@@ -1,0 +1,171 @@
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <vector>
+
+// Define sensor classes
+class Sensor {
+public:
+    virtual bool read() = 0;  // Abstract method for reading sensor data
+};
+
+class TemperatureSensor : public Sensor {
+public:
+    bool read() override {
+        // Simulate temperature reading
+        return rand() % 100 / 2 + 10; // Generate a random value between 10 and 60
+    }
+};
+
+class HumiditySensor : public Sensor {
+public:
+    bool read() override {
+        // Simulate humidity reading
+        return rand() % 100;
+    }
+};
+
+class ContactSensor : public Sensor {
+public:
+    bool read() override {
+        // Simulate contact reading
+        return rand() % 2 == 0; // 50% chance of being open
+    }
+};
+
+class MotionSensor : public Sensor {
+public:
+    bool read() override {
+        // Simulate motion reading
+        return rand() % 2 == 0; // 50% chance of detecting motion
+    }
+};
+
+// Smart Home System
+class SmartHomeSystem {
+public:
+    bool heatingOn = false;
+    bool coolingOn = false;
+    bool dehumidifierOn = false;
+    bool humidifierOn = false;
+
+    // Logic for temperature control
+    void controlTemperature(TemperatureSensor& tempSensor) {
+        int temperature = tempSensor.read();
+        if (temperature < 18) {
+            heatingOn = true;
+            coolingOn = false;
+        }
+        else if (temperature > 20) {
+            heatingOn = false;
+            coolingOn = true;
+        }
+        else {
+            heatingOn = false;
+            coolingOn = false;
+        }
+        // Implement hysteresis
+    }
+
+    // Logic for humidity control
+    void controlHumidity(HumiditySensor& humiditySensor) {
+        int humidity = humiditySensor.read();
+        if (humidity < 55) {
+            humidifierOn = true;
+            dehumidifierOn = false;
+        }
+        else if (humidity > 60) {
+            dehumidifierOn = true;
+            humidifierOn = false;
+        }
+        else {
+            dehumidifierOn = false;
+            humidifierOn = false;
+        }
+        // Implement quiet periods
+    }
+
+    // Logic for security system
+    void controlSecurity(ContactSensor& contactSensor, MotionSensor& motionSensor) {
+        // Implement security logic based on user's choice
+    }
+};
+
+// User Interface
+class UserInterface {
+public:
+    SmartHomeSystem& smartHome;
+
+    UserInterface(SmartHomeSystem& sh) : smartHome(sh) {}
+
+    void adjustThresholds() {
+        // Implement UI for adjusting temperature and humidity thresholds
+        int tempThreshold, humidityThreshold;
+        std::cout << "Enter the temperature threshold: ";
+        std::cin >> tempThreshold;
+        std::cout << "Enter the humidity threshold: ";
+        std::cin >> humidityThreshold;
+        // Now you can use these thresholds in your control logic
+    }
+
+    void setQuietPeriods() {
+        // Implement UI for setting quiet periods
+        int quietPeriod;
+        std::cout << "Enter the duration of the quiet period (in minutes): ";
+        std::cin >> quietPeriod;
+        // Now you can use this quiet period in your control logic
+    }
+
+    void enableDisableSecurity() {
+        // Implement UI for enabling/disabling security features
+        char choice;
+        std::cout << "Do you want to enable security? (Y/N): ";
+        std::cin >> choice;
+        if (choice == 'Y' || choice == 'y') {
+            // Enable security
+        }
+        else {
+            // Disable security
+        }
+    }
+
+    void raiseAlarm() {
+        // Implement UI for raising alarms based on sensor data
+        std::cout << "Alarm! Sensor data indicates a problem." << std::endl;
+    }
+
+    void displayStatus() {
+        // Display the current status of the smart home system
+        std::cout << "Heating: " << (smartHome.heatingOn ? "On" : "Off") << std::endl;
+        std::cout << "Cooling: " << (smartHome.coolingOn ? "On" : "Off") << std::endl;
+        std::cout << "Dehumidifier: " << (smartHome.dehumidifierOn ? "On" : "Off") << std::endl;
+        std::cout << "Humidifier: " << (smartHome.humidifierOn ? "On" : "Off") << std::endl;
+    }
+};
+
+int main() {
+    TemperatureSensor temperatureSensor;
+    HumiditySensor humiditySensor;
+    ContactSensor contactSensor;
+    MotionSensor motionSensor;
+
+    SmartHomeSystem smartHome;
+    UserInterface ui(smartHome);
+
+    while (true) {
+        smartHome.controlTemperature(temperatureSensor);
+        smartHome.controlHumidity(humiditySensor);
+        smartHome.controlSecurity(contactSensor, motionSensor);
+
+        // User interactions
+        ui.adjustThresholds();
+        ui.setQuietPeriods();
+        ui.enableDisableSecurity();
+        ui.displayStatus();
+
+        // Sleep for a while before the next iteration
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    return 0;
+}
